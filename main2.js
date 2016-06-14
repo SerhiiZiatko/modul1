@@ -1,5 +1,5 @@
 
-" use strict ";
+" use strict";
 
 function ready(){
     // объект данных по отделам
@@ -41,6 +41,69 @@ function ready(){
 
         return el; 
     }
+
+    // функция поиска элемента DOM
+    function $( el ){
+        return document.querySelector( el );
+    }
+
+    // обработка данных первого уровня(название отделов) и создание шапки таблиц
+    function readArray( arrName, position ){
+        var table, 
+            caption, 
+            trh;
+
+        table = makeEl( "table", arrName);
+        table.setAttribute( "id", arrName);
+        caption = makeEl( "caption" );
+        caption.insertAdjacentHTML( "afterBegin", arrName );
+        trh = makeEl( "tr", "trh_" + arrName );
+        table.appendChild( caption );
+        table.appendChild( trh );
+        position.appendChild( table );    
+    }
+    
+    // обработка данных третего уровня(значения объекта с ключами name и salary) и создание строк и ячеек таблицы. 
+    function readObj(position, obj, objKey ){
+        var tr, 
+            td, 
+            th, 
+            thProp, 
+            tdProp,
+            
+            i, len;
+
+        tr = makeEl( "tr");
+ 
+        for( i = 0, len = objKey.length; i < len; i++ ){
+            
+            thProp = objKey[ i ];
+            tdProp = obj[ thProp ];
+
+            // добавление в таблицу полей "name" и "salary" и ограничение повторного добавления
+            if( !$( "." + position  + " ." + thProp )){
+                th = makeEl( "th", thProp );
+                th.insertAdjacentHTML( "afterBegin", thProp );
+                $( ".trh_" + position ).appendChild( th );
+            }
+            // добавление в таблицу значений sarary
+            if ( thProp === "salary" ){
+                td = makeEl( "td", "salaryVal" );
+                td.insertAdjacentHTML( "afterBegin", tdProp );
+            }
+            // добавление в таблицу значений name
+            else if ( thProp === "name" ){
+                td = makeEl( "td", "nameVal" );
+                td.insertAdjacentHTML( "afterBegin", tdProp );
+            }
+            else{
+                alert( "проверте коректность данных" );
+            }
+            tr.appendChild( td );
+        }
+        $( "#" + position ).appendChild( tr );
+    }
+
     // вывод данных в окне браузера
     function printList( obj, posId ){
         var firstLev, 
@@ -52,7 +115,7 @@ function ready(){
             j,len2;
 
         firstLev = Object.keys( obj );
-        position = document.getElementById( posId );
+        position = $( "#" + posId );
         
         // перебор основного объекта
         for( i = 0, len = firstLev.length; i < len; i++ ){
@@ -77,64 +140,13 @@ function ready(){
             }   
         }
     }
-    // обработка данных первого уровня(название отделов) и создание шапки таблиц
-    function readArray( arrName, position ){
-        var table, 
-            caption, 
-            trh;
-
-        table = makeEl( "table", arrName);
-        table.setAttribute( "id", arrName);
-        caption = makeEl( "caption" );
-        caption.insertAdjacentHTML( "afterBegin", arrName );
-        trh = makeEl( "tr", "trh_" + arrName );
-        table.appendChild( caption );
-        table.appendChild( trh );
-        position.appendChild( table );    
-    }
-    // обработка данных третего уровня(значения объекта с ключами name и salary) и создание строк и ячеек таблицы. 
-    function readObj(position, obj, objKey ){
-        var tr, 
-            td, 
-            th, 
-            thProp, 
-            tdProp,
-            
-            i, len;
-
-        tr = makeEl( "tr");
- 
-        for( i = 0, len = objKey.length; i < len; i++ ){
-            
-            thProp = objKey[ i ];
-            tdProp = obj[ thProp ];
-
-            // добавление в таблицу полей "name" и "salary" и ограничение повторного добавления
-            if( !document.getElementsByClassName( position )[ 0 ].getElementsByClassName( thProp )[ 0 ] ){
-                th = makeEl( "th", thProp );
-                th.insertAdjacentHTML( "afterBegin", thProp );
-                document.getElementsByClassName( "trh_" + position )[ 0 ].appendChild( th );
-            }
-            // добавление в таблицу значений sarary
-            if ( thProp === "salary" ){
-                td = makeEl( "td", "salaryVal" );
-                td.insertAdjacentHTML( "afterBegin", tdProp );
-            }
-            // добавление в таблицу значений name
-            else if ( thProp === "name" ){
-                td = makeEl( "td", "nameVal" );
-                td.insertAdjacentHTML( "afterBegin", tdProp );
-            }
-            else{
-                alert( "проверте коректность данных" );
-            }
-            tr.appendChild( td );
-        }
-        document.getElementById( position ).appendChild( tr );
-    }
-
+    
     printList( Departments, "departments");
 
+
+    function checkFormVal(){
+
+    }
     // функция измения значения salary всем сотрудникам
     function setAll( val ) {
         
@@ -144,6 +156,7 @@ function ready(){
             i, len;
         console.log( +val );
         for( i = 0, len = tdSalary.length; i < len; i++ ){
+
             if( isNaN( +val ) && val.indexOf( "%", 1 ) === -1 ){
                 alert("Не корректный ввод значения заработной платы, введите число или значение в процентах(пример: 20% )");
                 return;
@@ -165,7 +178,7 @@ function ready(){
     }
     // функция измения значения salary конкретному сотруднику
     function setOne( dept, name, val ) {
-        var id =  document.querySelector( "#departments" ),
+        var id =  $( "#departments" ),
             table = id.querySelectorAll( "#" + dept ),
             td, 
             tdName, 
@@ -241,38 +254,37 @@ function ready(){
 
     // обратотка событий форм
     // событие submit для формы "Поднять зарплату всем!"
-    var changeAll = document.getElementById("changeAll");
+    
 
-    changeAll.addEventListener( "submit", function( e ){
+    $( "#" + "changeAll").addEventListener( "submit", function( e ){
         e.preventDefault();
         var val = document.getElementById("changeAllVal").value;
         setAll( val );
-        changeAll.reset();
+        this.reset();
     }, false);
 
     // событие submit для формы "Поднять зарплату одному из:)"
-    var changeOne = document.getElementById("changeOne");
     
-    changeOne.addEventListener( "submit", function( e ){
+    
+    $( "#" + "changeOne" ).addEventListener( "submit", function( e ){
         e.preventDefault();
         var val = document.getElementById("changeOneVal").value,
             dept = document.getElementById("changeOneDept").value,
             name = document.getElementById("changeOneName").value;
         setOne( dept, name, val );
-        changeOne.reset();
+        this.reset();
     }, false);
 
     // событие submit для формы "Неадекватный босс!"
-    var idiot = document.getElementById("idiot");
-
-    idiot.addEventListener( "submit", function( e ){
+    
+    $( "#" + "idiot").addEventListener( "submit", function( e ){
         e.preventDefault();
         var val = document.getElementById("idiotVal").value;
         inadequateBoss( val );
-        idiot.reset();
+        this.reset();
     }, false);
 
 
 }
-document.addEventListener( "DOMContentLoaded", ready);
+document.addEventListener( "DOMContentLoaded", ready, false);
 
