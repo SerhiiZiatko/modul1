@@ -1,5 +1,5 @@
 
-" use strict";
+"use strict";
 
 function ready(){
     // объект данных по отделам
