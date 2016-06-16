@@ -1,7 +1,7 @@
-
-"use strict";
-
 function ready(){
+
+    "use strict";
+
     // объект данных по отделам
     var Departments = {
         it: [ 
@@ -46,6 +46,7 @@ function ready(){
     function $( el ){
         return document.querySelector( el );
     }
+    
 
     // обработка данных первого уровня(название отделов) и создание шапки таблиц
     function readArray( arrName, position ){
@@ -64,7 +65,7 @@ function ready(){
     }
     
     // обработка данных третего уровня(значения объекта с ключами name и salary) и создание строк и ячеек таблицы. 
-    function readObj(position, obj, objKey ){
+    function readObj( position, obj, objKey ){
         var tr, 
             td, 
             th, 
@@ -86,7 +87,7 @@ function ready(){
                 th.insertAdjacentHTML( "afterBegin", thProp );
                 $( ".trh_" + position ).appendChild( th );
             }
-            // добавление в таблицу значений sarary
+            // добавление в таблицу значений salary
             if ( thProp === "salary" ){
                 td = makeEl( "td", "salaryVal" );
                 td.insertAdjacentHTML( "afterBegin", tdProp );
@@ -103,6 +104,7 @@ function ready(){
         }
         $( "#" + position ).appendChild( tr );
     }
+
 
     // вывод данных в окне браузера
     function printList( obj, posId ){
@@ -124,7 +126,7 @@ function ready(){
           
             readArray( firstLevKey, position);
 
-             // перебор массива
+            // перебор массива
             for( j = 0, len2 = secondLev.length; j < len2; j++ ){
                 //console.log( secondLev[ j ]);
                 var secondLevKey, 
@@ -143,50 +145,52 @@ function ready(){
     
     printList( Departments, "departments");
 
+    // функция проверки ввода пользователя и прибавление соответсвующего значения
+    function checkFormVal( salary, val ){
+        var rePercent = new RegExp( "^[0-9]+%$", "gm" ),
+            reNum = new RegExp( "^[0-9]+$", "gm" );
+                
+            if( val.search( reNum ) !== -1 )
+                return +salary + (+val);
+          
+            else if( val.search( rePercent ) !== -1 )
+                return +salary + (+salary * ( parseInt(val,10) / 100 )); 
 
-    function checkFormVal(){
-
+            else if( isNaN( val + "e0" + 0) )
+                return salary;         
     }
+
+    
+
     // функция измения значения salary всем сотрудникам
     function setAll( val ) {
-        
         var tdSalary = document.querySelectorAll( "td.salaryVal" ),
-            per,
+            sal,
 
             i, len;
-        console.log( +val );
+        //console.log( +val );
         for( i = 0, len = tdSalary.length; i < len; i++ ){
+            sal = tdSalary[ i ].innerHTML;
+            
+            tdSalary[ i ].innerHTML = checkFormVal( tdSalary[ i ].innerHTML, val );
+            
+            if ( tdSalary[ i ].innerHTML === sal )
+                return alert("Не корректный ввод значения заработной платы, введите число или значение в процентах(пример: 20% )");
 
-            if( isNaN( +val ) && val.indexOf( "%", 1 ) === -1 ){
-                alert("Не корректный ввод значения заработной платы, введите число или значение в процентах(пример: 20% )");
-                return;
-            }
-            else if( val.indexOf( "%", 1 ) !== -1 ){
-                per = parseInt( val, 10 ) / 100;
-                // дополнительная проверка на не корректный ввод типа ("twenty%")
-                if( isNaN( per ) ){
-                    alert("Не корректный ввод значения заработной платы, введите число или значение в процентах(пример: 20% )");
-                    return;
-                }
-                tdSalary[ i ].innerHTML = +tdSalary[ i ].innerHTML + ( +tdSalary[ i ].innerHTML * per );
-            }
-            else {
-                tdSalary[ i ].innerHTML = +tdSalary[ i ].innerHTML + ( +val );
-            }
-                            
         }
     }
+
+
     // функция измения значения salary конкретному сотруднику
     function setOne( dept, name, val ) {
         var id =  $( "#departments" ),
             table = id.querySelectorAll( "#" + dept ),
             td, 
-            tdName, 
             tdSalary, 
-            per, 
+            sal,
 
             i, len, j, len2;
-
+            
         //console.log( id );
         if ( table.length >= 1 ){
             //console.log( table.length );
@@ -197,27 +201,14 @@ function ready(){
                 for( j = 0, len2 = td.length; j < len2; j++ ){
                     
                     if ( td[ j ].innerHTML === name ){
-                        //console.log( td[ j ].innerHTML );
-                        //tdSalary = td[ j ].parentNode.querySelector( ".salaryVal" );
                         tdSalary = td[ j ].nextSibling;
-                        console.log( typeof +val );
-                        if( isNaN( +val ) && val.indexOf( "%", 1 ) === -1 ){
-                            alert("Не корректный ввод значения заработной платы, введите число или значение в процентах(пример: 20% )");
-                            return;
-                        }
-                        else if ( val.indexOf( "%", 1 ) !== -1 ){
-                            per = parseInt( val, 10 ) / 100;
-                            // дополнительная проверка на не корректный ввод типа ("twenty%")
-                            if( isNaN( per ) ){
-                                alert("Не корректный ввод значения заработной платы, введите число или значение в процентах(пример: 20% )");
-                                return;
-                            }
-
-                            tdSalary.innerHTML = +tdSalary.innerHTML + ( +tdSalary.innerHTML * per );
-                        }
-                        else if( typeof +val === "number" ){
-                            tdSalary.innerHTML = +tdSalary.innerHTML + ( +val );
-                        }             
+                        sal = tdSalary.innerHTML;
+                        
+                        tdSalary.innerHTML = checkFormVal( tdSalary.innerHTML, val );
+                        
+                        if ( tdSalary.innerHTML === sal )
+                            return alert("Не корректный ввод значения заработной платы, введите число или значение в процентах(пример: 20% )");
+  
                         return;
                     } 
                 }
@@ -228,60 +219,65 @@ function ready(){
             alert("Такого отдела не существует данной организации, проверте и введите данные снова!");
         }
     }
+    
+
     // функция измения значения salary всем сотрудникам неадекватным боссом:)
     function inadequateBoss( val ) {
         
-        var tdSalary = document.querySelectorAll(".salaryVal");
-        //console.log(  tdSalary.innerHTML );
-        for( var i = 0, len = tdSalary.length; i < len; i++){
-        
-            if ( +val >= 100 && +val <= 10000 ){
-                var per = Math.floor( ( Math.random() - 0.5 ) * +val );
-                //console.log( per );
+        var tdSalary = document.querySelectorAll(".salaryVal"),
+            per,
 
-                tdSalary[ i ].innerHTML = +tdSalary[ i ].innerHTML + per;
+            i, len;
+        //console.log(  tdSalary.innerHTML );
+        for( i = 0, len = tdSalary.length; i < len; i++){
+            
+            if( !isNaN( val + "e0" + 0 )){
+                if ( +val >= 100 && +val <= 10000 ){
+                    per = Math.floor( ( Math.random() - 0.5 ) * +val );
+                    tdSalary[ i ].innerHTML = +tdSalary[ i ].innerHTML + per;
+                }
+                else if( +val > 10000 ){
+                    alert( "Уважаемый босс, извините за прямолинейность, вам пора к доктору!!!:))" );
+                    break; 
+                }
+                else if( +val < 100 ){
+                    alert( "Уважаемый босс, я знаю, что  ты можешь быть более неадекватным! Продемонстрируй это:)" );
+                    break; 
+                }
             }
-            else if( +val > 10000 ){
-                alert( "Уважаемый босс, извините за прямолинейность, вам пора к доктору!!!:))" );
-                break; 
-            }
-            else if( +val < 100 ){
-                alert( "Уважаемый босс, я знаю, что  ты можешь быть более неадекватным! Продемонстрируй это:)" );
-                break; 
-            }
+            else 
+                return alert( "Уважаемый босс, доктор уже едет!!:))" );
         }                    
     }
 
     // обратотка событий форм
-    // событие submit для формы "Поднять зарплату всем!"
+    // событие submit для форм
     
 
-    $( "#" + "changeAll").addEventListener( "submit", function( e ){
+    $( "#" + "forms").addEventListener( "submit", function( e ){
         e.preventDefault();
-        var val = document.getElementById("changeAllVal").value;
-        setAll( val );
-        this.reset();
-    }, false);
+        var val, 
+            dept, 
+            name,
+            eventId = e.target.id;
 
-    // событие submit для формы "Поднять зарплату одному из:)"
-    
-    
-    $( "#" + "changeOne" ).addEventListener( "submit", function( e ){
-        e.preventDefault();
-        var val = document.getElementById("changeOneVal").value,
-            dept = document.getElementById("changeOneDept").value,
+        //console.log( e.target.id );
+        if ( eventId === "changeAll"){
+            val = document.getElementById("changeAllVal").value;
+            setAll( val );
+        }
+        else if ( eventId === "changeOne"){
+            val = document.getElementById("changeOneVal").value;
+            dept = document.getElementById("changeOneDept").value;
             name = document.getElementById("changeOneName").value;
-        setOne( dept, name, val );
-        this.reset();
-    }, false);
+            setOne( dept, name, val );
+        }
+        else if ( eventId === "idiot"){
+            val = document.getElementById("idiotVal").value;
+            inadequateBoss( val );
+        } 
 
-    // событие submit для формы "Неадекватный босс!"
-    
-    $( "#" + "idiot").addEventListener( "submit", function( e ){
-        e.preventDefault();
-        var val = document.getElementById("idiotVal").value;
-        inadequateBoss( val );
-        this.reset();
+        e.target.reset();
     }, false);
 
 
